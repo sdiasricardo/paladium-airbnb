@@ -14,26 +14,32 @@ const Bookings: React.FC = () => {
   const { currentUser } = useAuth();
 
   useEffect(() => {
-    if (currentUser && currentUser.userType === 'guest') {
-      try {
-        const guestBookings = getBookingsByGuestId(currentUser.id);
-        
-        // Fetch property details for each booking
-        const bookingsWithProperties = guestBookings.map(booking => {
-          const property = getPropertyById(booking.propertyId);
-          return {
-            ...booking,
-            property
-          };
-        });
-        
-        setBookings(bookingsWithProperties);
-      } catch (error) {
-        console.error('Error fetching bookings:', error);
-      } finally {
-        setLoading(false);
+    const fetchBookings = async () => {
+      if (currentUser && currentUser.userType === 'guest') {
+        try {
+          const guestBookings = await getBookingsByGuestId(currentUser.id);
+          
+          // Fetch property details for each booking
+          const bookingsWithProperties = await Promise.all(
+            guestBookings.map(async (booking) => {
+              const property = await getPropertyById(booking.propertyId);
+              return {
+                ...booking,
+                property
+              };
+            })
+          );
+          
+          setBookings(bookingsWithProperties);
+        } catch (error) {
+          console.error('Error fetching bookings:', error);
+        } finally {
+          setLoading(false);
+        }
       }
-    }
+    };
+
+    fetchBookings();
   }, [currentUser]);
 
   if (!currentUser || currentUser.userType !== 'guest') {

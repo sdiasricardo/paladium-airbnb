@@ -18,7 +18,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   });
 
   const login = async (username: string, password: string): Promise<boolean> => {
-    const user = loginUser(username, password);
+    const user = await loginUser(username, password);
     if (user) {
       setCurrentUser(user);
       localStorage.setItem('currentUser', JSON.stringify(user));
@@ -28,7 +28,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const register = async (username: string, password: string, userType: 'guest' | 'host'): Promise<boolean> => {
-    const user = createUser(username, password, userType);
+    const user = await createUser(username, password, userType);
     if (user) {
       setCurrentUser(user);
       localStorage.setItem('currentUser', JSON.stringify(user));

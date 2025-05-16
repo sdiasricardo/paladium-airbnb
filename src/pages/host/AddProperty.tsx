@@ -13,7 +13,7 @@ const AddProperty: React.FC = () => {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
@@ -33,7 +33,7 @@ const AddProperty: React.FC = () => {
       return;
     }
 
-    const property = createProperty(
+    const property = await createProperty(
       currentUser.id,
       title,
       description,

@@ -8,9 +8,9 @@ const Home: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchProperties = () => {
+    const fetchProperties = async () => {
       try {
-        const allProperties = getAllProperties();
+        const allProperties = await getAllProperties();
         setProperties(allProperties);
       } catch (error) {
         console.error('Error fetching properties:', error);

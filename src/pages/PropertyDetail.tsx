@@ -17,19 +17,23 @@ const PropertyDetail: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (id) {
-      try {
-        const fetchedProperty = getPropertyById(parseInt(id));
-        setProperty(fetchedProperty);
-      } catch (error) {
-        console.error('Error fetching property:', error);
-      } finally {
-        setLoading(false);
+    const fetchProperty = async () => {
+      if (id) {
+        try {
+          const fetchedProperty = await getPropertyById(parseInt(id));
+          setProperty(fetchedProperty);
+        } catch (error) {
+          console.error('Error fetching property:', error);
+        } finally {
+          setLoading(false);
+        }
       }
-    }
+    };
+
+    fetchProperty();
   }, [id]);
 
-  const handleBooking = () => {
+  const handleBooking = async () => {
     setBookingError('');
     setBookingSuccess(false);
 
@@ -55,13 +59,13 @@ const PropertyDetail: React.FC = () => {
 
     if (!property) return;
 
-    const available = isPropertyAvailable(property.id, startDate, endDate);
+    const available = await isPropertyAvailable(property.id, startDate, endDate);
     if (!available) {
       setBookingError('Property is not available for the selected dates');
       return;
     }
 
-    const booking = createBooking(property.id, currentUser.id, startDate, endDate);
+    const booking = await createBooking(property.id, currentUser.id, startDate, endDate);
     if (booking) {
       setBookingSuccess(true);
       setStartDate('');

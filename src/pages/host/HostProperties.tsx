@@ -11,16 +11,20 @@ const HostProperties: React.FC = () => {
   const { currentUser } = useAuth();
 
   useEffect(() => {
-    if (currentUser && currentUser.userType === 'host') {
-      try {
-        const hostProperties = getPropertiesByHostId(currentUser.id);
-        setProperties(hostProperties);
-      } catch (error) {
-        console.error('Error fetching host properties:', error);
-      } finally {
-        setLoading(false);
+    const fetchProperties = async () => {
+      if (currentUser && currentUser.userType === 'host') {
+        try {
+          const hostProperties = await getPropertiesByHostId(currentUser.id);
+          setProperties(hostProperties);
+        } catch (error) {
+          console.error('Error fetching host properties:', error);
+        } finally {
+          setLoading(false);
+        }
       }
-    }
+    };
+
+    fetchProperties();
   }, [currentUser]);
 
   if (!currentUser || currentUser.userType !== 'host') {

@@ -1,62 +1,70 @@
-import db from './database';
+import { dbPromise } from './database';
 import { Property } from '../types';
 
-export const createProperty = (
+export const createProperty = async (
   hostId: number,
   title: string,
   description: string,
   price: number,
   location: string,
   imageUrl: string
-): Property | null => {
+): Promise<Property | null> => {
   try {
-    const stmt = db.prepare(
-      'INSERT INTO properties (hostId, title, description, price, location, imageUrl) VALUES (?, ?, ?, ?, ?, ?)'
-    );
-    const result = stmt.run(hostId, title, description, price, location, imageUrl);
+    const db = await dbPromise;
     
-    if (result.lastInsertRowid) {
-      return {
-        id: result.lastInsertRowid as number,
-        hostId,
-        title,
-        description,
-        price,
-        location,
-        imageUrl
-      };
-    }
-    return null;
+    const id = await db.add('properties', {
+      hostId,
+      title,
+      description,
+      price,
+      location,
+      imageUrl
+    });
+    
+    return {
+      id: id as number,
+      hostId,
+      title,
+      description,
+      price,
+      location,
+      imageUrl
+    };
   } catch (error) {
     console.error('Error creating property:', error);
     return null;
   }
 };
 
-export const getPropertiesByHostId = (hostId: number): Property[] => {
+export const getPropertiesByHostId = async (hostId: number): Promise<Property[]> => {
   try {
-    const stmt = db.prepare('SELECT * FROM properties WHERE hostId = ?');
-    return stmt.all(hostId) as Property[];
+    const db = await dbPromise;
+    const tx = db.transaction('properties', 'readonly');
+    const index = tx.store.index('hostId');
+    
+    const properties = await index.getAll(hostId);
+    return properties as Property[];
   } catch (error) {
     console.error('Error getting host properties:', error);
     return [];
   }
 };
 
-export const getAllProperties = (): Property[] => {
+export const getAllProperties = async (): Promise<Property[]> => {
   try {
-    const stmt = db.prepare('SELECT * FROM properties');
-    return stmt.all() as Property[];
+    const db = await dbPromise;
+    const properties = await db.getAll('properties');
+    return properties as Property[];
   } catch (error) {
     console.error('Error getting all properties:', error);
     return [];
   }
 };
 
-export const getPropertyById = (id: number): Property | null => {
+export const getPropertyById = async (id: number): Promise<Property | null> => {
   try {
-    const stmt = db.prepare('SELECT * FROM properties WHERE id = ?');
-    const property = stmt.get(id) as Property | undefined;
+    const db = await dbPromise;
+    const property = await db.get('properties', id);
     return property || null;
   } catch (error) {
     console.error('Error getting property:', error);

@@ -1,63 +1,72 @@
-import db from './database';
+import { dbPromise } from './database';
 import { Booking } from '../types';
 import { isWithinInterval, parseISO } from 'date-fns';
 
-export const createBooking = (
+export const createBooking = async (
   propertyId: number,
   guestId: number,
   startDate: string,
   endDate: string
-): Booking | null => {
+): Promise<Booking | null> => {
   try {
     // Check if the property is available for the selected dates
-    if (!isPropertyAvailable(propertyId, startDate, endDate)) {
+    const isAvailable = await isPropertyAvailable(propertyId, startDate, endDate);
+    if (!isAvailable) {
       return null;
     }
 
-    const stmt = db.prepare(
-      'INSERT INTO bookings (propertyId, guestId, startDate, endDate) VALUES (?, ?, ?, ?)'
-    );
-    const result = stmt.run(propertyId, guestId, startDate, endDate);
+    const db = await dbPromise;
+    const id = await db.add('bookings', {
+      propertyId,
+      guestId,
+      startDate,
+      endDate
+    });
     
-    if (result.lastInsertRowid) {
-      return {
-        id: result.lastInsertRowid as number,
-        propertyId,
-        guestId,
-        startDate,
-        endDate
-      };
-    }
-    return null;
+    return {
+      id: id as number,
+      propertyId,
+      guestId,
+      startDate,
+      endDate
+    };
   } catch (error) {
     console.error('Error creating booking:', error);
     return null;
   }
 };
 
-export const getBookingsByGuestId = (guestId: number): Booking[] => {
+export const getBookingsByGuestId = async (guestId: number): Promise<Booking[]> => {
   try {
-    const stmt = db.prepare('SELECT * FROM bookings WHERE guestId = ?');
-    return stmt.all(guestId) as Booking[];
+    const db = await dbPromise;
+    const tx = db.transaction('bookings', 'readonly');
+    const index = tx.store.index('guestId');
+    
+    const bookings = await index.getAll(guestId);
+    return bookings as Booking[];
   } catch (error) {
     console.error('Error getting guest bookings:', error);
     return [];
   }
 };
 
-export const getBookingsByPropertyId = (propertyId: number): Booking[] => {
+export const getBookingsByPropertyId = async (propertyId: number): Promise<Booking[]> => {
   try {
-    const stmt = db.prepare('SELECT * FROM bookings WHERE propertyId = ?');
-    return stmt.all(propertyId) as Booking[];
+    const db = await dbPromise;
+    const tx = db.transaction('bookings', 'readonly');
+    const index = tx.store.index('propertyId');
+    
+    const bookings = await index.getAll(propertyId);
+    return bookings as Booking[];
   } catch (error) {
     console.error('Error getting property bookings:', error);
     return [];
   }
 };
 
-export const isPropertyAvailable = (propertyId: number, startDate: string, endDate: string): boolean => {
+export const isPropertyAvailable = async (propertyId: number, startDate: string, endDate: string): Promise<boolean> => {
   try {
-    const bookings = getBookingsByPropertyId(propertyId);
+    const bookings = await getBookingsByPropertyId(propertyId);
     const requestedStart = parseISO(startDate);
     const requestedEnd = parseISO(endDate);
 
