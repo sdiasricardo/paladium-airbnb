@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Booking, Property } from '../types';
-import { getBookingsByGuestId } from '../db/bookingService';
+import { getBookingsByGuestId, cancelBooking } from '../db/bookingService';
 import { getPropertyById } from '../db/propertyService';
 
 interface BookingWithProperty extends Booking {
@@ -11,36 +11,62 @@ interface BookingWithProperty extends Booking {
 const Bookings: React.FC = () => {
   const [bookings, setBookings] = useState<BookingWithProperty[]>([]);
   const [loading, setLoading] = useState(true);
+  const [cancelingBookingId, setCancelingBookingId] = useState<number | null>(null);
+  const [cancelSuccess, setCancelSuccess] = useState(false);
+  const [cancelError, setCancelError] = useState('');
   const { currentUser } = useAuth();
 
-  useEffect(() => {
-    const fetchBookings = async () => {
-      if (currentUser && currentUser.userType === 'guest') {
-        try {
-          const guestBookings = await getBookingsByGuestId(currentUser.id);
-          
-          // Fetch property details for each booking
-          const bookingsWithProperties = await Promise.all(
-            guestBookings.map(async (booking) => {
-              const property = await getPropertyById(booking.propertyId);
-              return {
-                ...booking,
-                property
-              };
-            })
-          );
-          
-          setBookings(bookingsWithProperties);
-        } catch (error) {
-          console.error('Error fetching bookings:', error);
-        } finally {
-          setLoading(false);
-        }
+  const fetchBookings = async () => {
+    if (currentUser && currentUser.userType === 'guest') {
+      try {
+        const guestBookings = await getBookingsByGuestId(currentUser.id);
+        
+        // Fetch property details for each booking
+        const bookingsWithProperties = await Promise.all(
+          guestBookings.map(async (booking) => {
+            const property = await getPropertyById(booking.propertyId);
+            return {
+              ...booking,
+              property
+            };
+          })
+        );
+        
+        setBookings(bookingsWithProperties);
+      } catch (error) {
+        console.error('Error fetching bookings:', error);
+      } finally {
+        setLoading(false);
       }
-    };
+    }
+  };
 
+  useEffect(() => {
     fetchBookings();
   }, [currentUser]);
+
+  const handleCancelBooking = async (bookingId: number) => {
+    if (!currentUser) return;
+    
+    setCancelingBookingId(bookingId);
+    setCancelError('');
+    
+    try {
+      const success = await cancelBooking(bookingId, currentUser.id);
+      if (success) {
+        setCancelSuccess(true);
+        // Remove the canceled booking from the state
+        setBookings(bookings.filter(booking => booking.id !== bookingId));
+        setTimeout(() => setCancelSuccess(false), 3000);
+      } else {
+        setCancelError('Failed to cancel booking');
+      }
+    } catch (error) {
+      setCancelError('An error occurred while canceling the booking');
+    } finally {
+      setCancelingBookingId(null);
+    }
+  };
 
   if (!currentUser || currentUser.userType !== 'guest') {
     return (
@@ -57,6 +83,18 @@ const Bookings: React.FC = () => {
   return (
     <div className="container mx-auto py-8 px-4">
       <h1 className="text-3xl font-bold mb-6">My Bookings</h1>
+      
+      {cancelSuccess && (
+        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+          Booking canceled successfully.
+        </div>
+      )}
+
+      {cancelError && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+          {cancelError}
+        </div>
+      )}
       
       {bookings.length === 0 ? (
         <div className="text-center py-10">
@@ -87,6 +125,15 @@ const Bookings: React.FC = () => {
                     <div>
                       <span className="font-semibold">Price:</span> ${booking.property?.price || 0}/night
                     </div>
+                  </div>
+                  <div className="mt-4">
+                    <button
+                      onClick={() => handleCancelBooking(booking.id)}
+                      disabled={cancelingBookingId === booking.id}
+                      className="text-red-500 hover:text-red-700 font-medium"
+                    >
+                      {cancelingBookingId === booking.id ? 'Canceling...' : 'Cancel Booking'}
+                    </button>
                   </div>
                 </div>
               </div>

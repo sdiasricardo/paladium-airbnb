@@ -88,6 +88,28 @@ export const getBookingsByHostId = async (hostId: number): Promise<Booking[]> =>
   }
 };
 
+export const cancelBooking = async (bookingId: number, guestId: number): Promise<boolean> => {
+  try {
+    const db = await dbPromise;
+    
+    // First, get the booking to verify ownership
+    const booking = await db.get('bookings', bookingId);
+    
+    // Check if booking exists and belongs to the requesting guest
+    if (!booking || booking.guestId !== guestId) {
+      console.error('Unauthorized booking cancellation attempt');
+      return false;
+    }
+    
+    // If verification passes, delete the booking
+    await db.delete('bookings', bookingId);
+    return true;
+  } catch (error) {
+    console.error('Error canceling booking:', error);
+    return false;
+  }
+};
+
 export const getBookedDateRanges = async (propertyId: number): Promise<{start: Date, end: Date}[]> => {
   try {
     const bookings = await getBookingsByPropertyId(propertyId);

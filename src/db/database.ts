@@ -1,9 +1,10 @@
 // Using IndexedDB for browser storage instead of SQLite
-import { openDB } from 'idb';
+import { openDB, deleteDB } from 'idb';
 
 const initDB = async () => {
-  const db = await openDB('airbnb-clone', 1, {
-    upgrade(db) {
+  // Increment the version number to trigger the upgrade function
+  const db = await openDB('airbnb-clone', 2, {
+    upgrade(db, oldVersion, newVersion, transaction) {
       // Create users store
       if (!db.objectStoreNames.contains('users')) {
         const userStore = db.createObjectStore('users', { keyPath: 'id', autoIncrement: true });
@@ -26,6 +27,16 @@ const initDB = async () => {
   });
 
   return db;
+};
+
+export const clearDatabase = async (): Promise<boolean> => {
+  try {
+    await deleteDB('airbnb-clone');
+    return true;
+  } catch (error) {
+    console.error('Error clearing database:', error);
+    return false;
+  }
 };
 
 export const dbPromise = initDB();
