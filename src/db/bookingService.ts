@@ -64,6 +64,19 @@ export const getBookingsByPropertyId = async (propertyId: number): Promise<Booki
   }
 };
 
+export const getBookedDateRanges = async (propertyId: number): Promise<{start: Date, end: Date}[]> => {
+  try {
+    const bookings = await getBookingsByPropertyId(propertyId);
+    return bookings.map(booking => ({
+      start: parseISO(booking.startDate),
+      end: parseISO(booking.endDate)
+    }));
+  } catch (error) {
+    console.error('Error getting booked dates:', error);
+    return [];
+  }
+};
+
 export const isPropertyAvailable = async (propertyId: number, startDate: string, endDate: string): Promise<boolean> => {
   try {
     const bookings = await getBookingsByPropertyId(propertyId);

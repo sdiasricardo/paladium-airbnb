@@ -4,6 +4,7 @@ import { Property } from '../types';
 import { getPropertyById } from '../db/propertyService';
 import { createBooking, isPropertyAvailable } from '../db/bookingService';
 import { useAuth } from '../context/AuthContext';
+import BookingCalendar from '../components/BookingCalendar';
 
 const PropertyDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -75,6 +76,11 @@ const PropertyDetail: React.FC = () => {
     }
   };
 
+  const handleDateRangeSelect = (start: Date | null, end: Date | null) => {
+    setStartDate(start ? start.toISOString().split('T')[0] : '');
+    setEndDate(end ? end.toISOString().split('T')[0] : '');
+  };
+
   if (loading) {
     return <div className="text-center py-10">Loading property details...</div>;
   }
@@ -118,32 +124,14 @@ const PropertyDetail: React.FC = () => {
                 </div>
               )}
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div>
-                  <label className="block text-gray-700 mb-2">Check-in Date</label>
-                  <input
-                    type="date"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    min={new Date().toISOString().split('T')[0]}
-                    className="w-full px-3 py-2 border rounded-lg"
-                  />
-                </div>
-                <div>
-                  <label className="block text-gray-700 mb-2">Check-out Date</label>
-                  <input
-                    type="date"
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    min={startDate || new Date().toISOString().split('T')[0]}
-                    className="w-full px-3 py-2 border rounded-lg"
-                  />
-                </div>
-              </div>
+              <BookingCalendar 
+                propertyId={property.id} 
+                onDateRangeSelect={handleDateRangeSelect} 
+              />
               
               <button
                 onClick={handleBooking}
-                className="bg-red-500 text-white py-2 px-6 rounded-lg hover:bg-red-600"
+                className="bg-red-500 text-white py-2 px-6 rounded-lg hover:bg-red-600 mt-4"
               >
                 Book Now
               </button>
