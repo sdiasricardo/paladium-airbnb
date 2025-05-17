@@ -1,5 +1,7 @@
 import { dbPromise } from './database';
 import { User, UserType } from '../types';
+import { getBookingsByHostId } from './bookingService';
+import { getPropertiesByHostId } from './propertyService';
 
 export const createUser = async (username: string, password: string, userType: UserType): Promise<User | null> => {
   try {
@@ -72,5 +74,40 @@ export const getUserById = async (id: number): Promise<User | null> => {
   } catch (error) {
     console.error('Error getting user:', error);
     return null;
+  }
+};
+
+export const getRevenueByMonth = async (hostId: number): Promise<{month: string, revenue: number}[]> => {
+  try {
+    const bookings = await getBookingsByHostId(hostId);
+    const properties = await getPropertiesByHostId(hostId);
+    
+    // Group bookings by month
+    const revenueByMonth = new Map<string, number>();
+    
+    bookings.forEach(booking => {
+      const property = properties.find(p => p.id === booking.propertyId);
+      if (property) {
+        const checkIn = new Date(booking.startDate);
+        const checkOut = new Date(booking.endDate);
+        const nights = Math.round((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24));
+        const revenue = property.price * nights;
+        
+        // Format month as YYYY-MM
+        const month = `${checkIn.getFullYear()}-${String(checkIn.getMonth() + 1).padStart(2, '0')}`;
+        
+        revenueByMonth.set(month, (revenueByMonth.get(month) || 0) + revenue);
+      }
+    });
+    
+    // Convert to array and sort by month
+    const result = Array.from(revenueByMonth.entries())
+      .map(([month, revenue]) => ({ month, revenue }))
+      .sort((a, b) => a.month.localeCompare(b.month));
+    
+    return result;
+  } catch (error) {
+    console.error('Error getting revenue by month:', error);
+    return [];
   }
 };

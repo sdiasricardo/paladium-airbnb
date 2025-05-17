@@ -3,7 +3,9 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { getPropertiesByHostId } from '../../db/propertyService';
 import { getBookingsByHostId } from '../../db/bookingService';
+import { getRevenueByMonth } from '../../db/userService';
 import { Property, Booking } from '../../types';
+import RevenueChart from '../../components/RevenueChart';
 
 interface BookingSummary {
   totalBookings: number;
@@ -18,6 +20,7 @@ const HostDashboard: React.FC = () => {
     upcomingBookings: 0,
     totalRevenue: 0
   });
+  const [revenueData, setRevenueData] = useState<{month: string, revenue: number}[]>([]);
   const [loading, setLoading] = useState(true);
   const { currentUser } = useAuth();
 
@@ -55,6 +58,10 @@ const HostDashboard: React.FC = () => {
             upcomingBookings,
             totalRevenue
           });
+
+          // Get revenue by month for the chart
+          const monthlyRevenue = await getRevenueByMonth(currentUser.id);
+          setRevenueData(monthlyRevenue);
         } catch (error) {
           console.error('Error fetching host data:', error);
         } finally {
@@ -97,6 +104,15 @@ const HostDashboard: React.FC = () => {
           <h2 className="text-xl font-semibold mb-2">Total Revenue</h2>
           <p className="text-3xl font-bold text-red-600">${bookingSummary.totalRevenue.toFixed(2)}</p>
         </div>
+      </div>
+      
+      <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+        <h2 className="text-xl font-semibold mb-4">Revenue Over Time</h2>
+        {revenueData.length > 0 ? (
+          <RevenueChart revenueData={revenueData} />
+        ) : (
+          <p className="text-gray-600 text-center py-8">No revenue data available yet.</p>
+        )}
       </div>
       
       <div className="bg-white rounded-lg shadow-md overflow-hidden">

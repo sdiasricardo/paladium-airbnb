@@ -1,6 +1,7 @@
 import { dbPromise } from './database';
 import { Booking } from '../types';
 import { isWithinInterval, parseISO } from 'date-fns';
+import { getPropertiesByHostId } from './propertyService';
 
 export const createBooking = async (
   propertyId: number,
