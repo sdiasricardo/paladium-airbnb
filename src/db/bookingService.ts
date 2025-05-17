@@ -64,6 +64,29 @@ export const getBookingsByPropertyId = async (propertyId: number): Promise<Booki
   }
 };
 
+export const getBookingsByHostId = async (hostId: number): Promise<Booking[]> => {
+  try {
+    const db = await dbPromise;
+    
+    // First get all properties owned by this host
+    const tx1 = db.transaction('properties', 'readonly');
+    const hostProperties = await tx1.store.index('hostId').getAll(hostId);
+    const propertyIds = hostProperties.map(property => property.id);
+    
+    // Then get all bookings for these properties
+    const allBookings: Booking[] = [];
+    for (const propertyId of propertyIds) {
+      const bookings = await getBookingsByPropertyId(propertyId);
+      allBookings.push(...bookings);
+    }
+    
+    return allBookings;
+  } catch (error) {
+    console.error('Error getting host bookings:', error);
+    return [];
+  }
+};
+
 export const getBookedDateRanges = async (propertyId: number): Promise<{start: Date, end: Date}[]> => {
   try {
     const bookings = await getBookingsByPropertyId(propertyId);

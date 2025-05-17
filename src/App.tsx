@@ -8,6 +8,8 @@ import PropertyDetail from './pages/PropertyDetail';
 import HostProperties from './pages/host/HostProperties';
 import AddProperty from './pages/host/AddProperty';
 import Bookings from './pages/Bookings';
+import HostDashboard from './pages/host/HostDashboard';
+import PropertyBookings from './pages/host/PropertyBookings';
 
 // Protected route component
 const ProtectedRoute = ({ children, userType }: { children: JSX.Element, userType?: 'guest' | 'host' }) => {
@@ -38,6 +40,14 @@ function App() {
             
             {/* Protected routes for hosts */}
             <Route 
+              path="/host/dashboard" 
+              element={
+                <ProtectedRoute userType="host">
+                  <HostDashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
               path="/host/properties" 
               element={
                 <ProtectedRoute userType="host">
@@ -50,6 +60,14 @@ function App() {
               element={
                 <ProtectedRoute userType="host">
                   <AddProperty />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/host/property/:id/bookings" 
+              element={
+                <ProtectedRoute userType="host">
+                  <PropertyBookings />
                 </ProtectedRoute>
               } 
             />

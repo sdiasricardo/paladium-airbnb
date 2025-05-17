@@ -17,8 +17,8 @@ const Navbar: React.FC = () => {
             <>
               {currentUser.userType === 'host' && (
                 <>
+                  <Link to="/host/dashboard" className="hover:text-red-500">Dashboard</Link>
                   <Link to="/host/properties" className="hover:text-red-500">My Properties</Link>
-                  <Link to="/host/add-property" className="hover:text-red-500">Add Property</Link>
                 </>
               )}
               
