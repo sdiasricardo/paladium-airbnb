@@ -8,12 +8,13 @@ export const createProperty = async (
   price: number,
   location: string,
   imageUrl: string,
-  amenities: MandatoryAmenities
+  mandatoryAmenities: MandatoryAmenities,
+  additionalAmenities: string[] = []
 ): Promise<Property | null> => {
   try {
     const db = await dbPromise;
 
-    if(!validateAmenities(amenities)) {
+    if(!validateAmenities(mandatoryAmenities)) {
       throw new Error('Missing required amenities!');
     }
     
@@ -24,7 +25,8 @@ export const createProperty = async (
       price,
       location,
       imageUrl,
-      amenities
+      mandatoryAmenities,
+      additionalAmenities
     });
     
     return {
@@ -35,7 +37,8 @@ export const createProperty = async (
       price,
       location,
       imageUrl,
-      amenities
+      mandatoryAmenities,
+      additionalAmenities
     };
   } catch (error) {
     console.error('Error creating property:', error);

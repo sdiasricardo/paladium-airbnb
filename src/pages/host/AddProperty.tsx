@@ -21,6 +21,8 @@ const AddProperty: React.FC = () => {
     hasHeater: false,
     hasGym: false
   });
+  const [additionalAmenities, setAdditionalAmenities] = useState<string[]>([]);
+  const [newAmenity, setNewAmenity] = useState('');
   const [error, setError] = useState('');
   const { currentUser } = useAuth();
   const navigate = useNavigate();
@@ -30,6 +32,17 @@ const AddProperty: React.FC = () => {
       ...prev,
       [field]: value
     }));
+  };
+
+  const addAmenity = () => {
+    if (newAmenity.trim() !== '') {
+      setAdditionalAmenities([...additionalAmenities, newAmenity.trim()]);
+      setNewAmenity('');
+    }
+  };
+
+  const removeAmenity = (index: number) => {
+    setAdditionalAmenities(additionalAmenities.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -59,7 +72,8 @@ const AddProperty: React.FC = () => {
       priceValue,
       location,
       imageUrl,
-      amenities
+      amenities,
+      additionalAmenities
     );
 
     if (property) {
@@ -280,6 +294,46 @@ const AddProperty: React.FC = () => {
             />
             <label htmlFor="hasGym">Gym</label>
           </div>
+        </div>
+        
+        <h3 className="text-lg font-semibold mb-4">Additional Amenities</h3>
+        <div className="mb-6">
+          <div className="flex mb-2">
+            <input
+              type="text"
+              value={newAmenity}
+              onChange={(e) => setNewAmenity(e.target.value)}
+              className="flex-grow px-3 py-2 border rounded-l-lg"
+              placeholder="Add another amenity"
+            />
+            <button
+              type="button"
+              onClick={addAmenity}
+              className="bg-red-500 text-white px-4 py-2 rounded-r-lg hover:bg-red-600"
+            >
+              Add
+            </button>
+          </div>
+          
+          {additionalAmenities.length > 0 && (
+            <div className="mt-2">
+              <p className="text-sm text-gray-600 mb-2">Added amenities:</p>
+              <div className="flex flex-wrap gap-2">
+                {additionalAmenities.map((amenity, index) => (
+                  <div key={index} className="bg-gray-100 px-3 py-1 rounded-full flex items-center">
+                    <span>{amenity}</span>
+                    <button
+                      type="button"
+                      onClick={() => removeAmenity(index)}
+                      className="ml-2 text-gray-500 hover:text-red-500"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
         
         <button

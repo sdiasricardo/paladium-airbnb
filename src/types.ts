@@ -26,7 +26,8 @@ export interface Property {
   price: number;
   location: string;
   imageUrl: string;
-  amenities: MandatoryAmenities;
+  mandatoryAmenities: MandatoryAmenities;
+  additionalAmenities: string[];
 }
 
 export interface Booking {

@@ -112,45 +112,58 @@ const PropertyDetail: React.FC = () => {
             <h2 className="text-xl font-semibold mb-4">Amenities</h2>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-y-2">
               <div className="flex items-center">
-                <span className="font-medium">{property.amenities.rooms} {property.amenities.rooms === 1 ? 'Room' : 'Rooms'}</span>
+                <span className="font-medium">{property.mandatoryAmenities.rooms} {property.mandatoryAmenities.rooms === 1 ? 'Room' : 'Rooms'}</span>
               </div>
               <div className="flex items-center">
-                <span className="font-medium">{property.amenities.bathrooms} {property.amenities.bathrooms === 1 ? 'Bathroom' : 'Bathrooms'}</span>
+                <span className="font-medium">{property.mandatoryAmenities.bathrooms} {property.mandatoryAmenities.bathrooms === 1 ? 'Bathroom' : 'Bathrooms'}</span>
               </div>
-              {property.amenities.garageSpaces > 0 && (
+              {property.mandatoryAmenities.garageSpaces > 0 && (
                 <div className="flex items-center">
-                  <span className="font-medium">{property.amenities.garageSpaces} {property.amenities.garageSpaces === 1 ? 'Garage Space' : 'Garage Spaces'}</span>
+                  <span className="font-medium">{property.mandatoryAmenities.garageSpaces} {property.mandatoryAmenities.garageSpaces === 1 ? 'Garage Space' : 'Garage Spaces'}</span>
                 </div>
               )}
-              {property.amenities.hasPool && (
+              {property.mandatoryAmenities.hasPool && (
                 <div className="flex items-center">
                   <span>Swimming Pool</span>
                 </div>
               )}
-              {property.amenities.hasBarbecue && (
+              {property.mandatoryAmenities.hasBarbecue && (
                 <div className="flex items-center">
                   <span>Barbecue Area</span>
                 </div>
               )}
-              {property.amenities.isPetFriendly && (
+              {property.mandatoryAmenities.isPetFriendly && (
                 <div className="flex items-center">
                   <span>Pet Friendly</span>
                 </div>
               )}
-              {property.amenities.hasAirConditioner && (
+              {property.mandatoryAmenities.hasAirConditioner && (
                 <div className="flex items-center">
                   <span>Air Conditioner</span>
                 </div>
               )}
-              {property.amenities.hasHeater && (
+              {property.mandatoryAmenities.hasHeater && (
                 <div className="flex items-center">
                   <span>Heater</span>
                 </div>
               )}
-              {property.amenities.hasGym && (
+              {property.mandatoryAmenities.hasGym && (
                 <div className="flex items-center">
                   <span>Gym</span>
                 </div>
+              )}
+              
+              {property.additionalAmenities && property.additionalAmenities.length > 0 && (
+                <>
+                  <div className="col-span-2 md:col-span-3 mt-4 mb-2">
+                    <h3 className="font-medium">Additional Amenities:</h3>
+                  </div>
+                  {property.additionalAmenities.map((amenity, index) => (
+                    <div key={index} className="flex items-center">
+                      <span>{amenity}</span>
+                    </div>
+                  ))}
+                </>
               )}
             </div>
           </div>
