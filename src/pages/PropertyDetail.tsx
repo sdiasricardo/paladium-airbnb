@@ -108,6 +108,53 @@ const PropertyDetail: React.FC = () => {
             <p className="text-gray-700">{property.description}</p>
           </div>
           
+          <div className="border-t border-gray-200 pt-4 mb-6">
+            <h2 className="text-xl font-semibold mb-4">Amenities</h2>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-y-2">
+              <div className="flex items-center">
+                <span className="font-medium">{property.amenities.rooms} {property.amenities.rooms === 1 ? 'Room' : 'Rooms'}</span>
+              </div>
+              <div className="flex items-center">
+                <span className="font-medium">{property.amenities.bathrooms} {property.amenities.bathrooms === 1 ? 'Bathroom' : 'Bathrooms'}</span>
+              </div>
+              {property.amenities.garageSpaces > 0 && (
+                <div className="flex items-center">
+                  <span className="font-medium">{property.amenities.garageSpaces} {property.amenities.garageSpaces === 1 ? 'Garage Space' : 'Garage Spaces'}</span>
+                </div>
+              )}
+              {property.amenities.hasPool && (
+                <div className="flex items-center">
+                  <span>Swimming Pool</span>
+                </div>
+              )}
+              {property.amenities.hasBarbecue && (
+                <div className="flex items-center">
+                  <span>Barbecue Area</span>
+                </div>
+              )}
+              {property.amenities.isPetFriendly && (
+                <div className="flex items-center">
+                  <span>Pet Friendly</span>
+                </div>
+              )}
+              {property.amenities.hasAirConditioner && (
+                <div className="flex items-center">
+                  <span>Air Conditioner</span>
+                </div>
+              )}
+              {property.amenities.hasHeater && (
+                <div className="flex items-center">
+                  <span>Heater</span>
+                </div>
+              )}
+              {property.amenities.hasGym && (
+                <div className="flex items-center">
+                  <span>Gym</span>
+                </div>
+              )}
+            </div>
+          </div>
+          
           {currentUser && currentUser.userType === 'guest' && (
             <div className="border-t border-gray-200 pt-4">
               <h2 className="text-xl font-semibold mb-4">Book this property</h2>

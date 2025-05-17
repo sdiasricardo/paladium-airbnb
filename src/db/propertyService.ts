@@ -1,5 +1,5 @@
 import { dbPromise } from './database';
-import { Property } from '../types';
+import { Property, MandatoryAmenities } from '../types';
 
 export const createProperty = async (
   hostId: number,
@@ -7,10 +7,15 @@ export const createProperty = async (
   description: string,
   price: number,
   location: string,
-  imageUrl: string
+  imageUrl: string,
+  amenities: MandatoryAmenities
 ): Promise<Property | null> => {
   try {
     const db = await dbPromise;
+
+    if(!validateAmenities(amenities)) {
+      throw new Error('Missing required amenities!');
+    }
     
     const id = await db.add('properties', {
       hostId,
@@ -18,7 +23,8 @@ export const createProperty = async (
       description,
       price,
       location,
-      imageUrl
+      imageUrl,
+      amenities
     });
     
     return {
@@ -28,7 +34,8 @@ export const createProperty = async (
       description,
       price,
       location,
-      imageUrl
+      imageUrl,
+      amenities
     };
   } catch (error) {
     console.error('Error creating property:', error);
@@ -70,4 +77,19 @@ export const getPropertyById = async (id: number): Promise<Property | null> => {
     console.error('Error getting property:', error);
     return null;
   }
+};
+
+const validateAmenities = (amenities: MandatoryAmenities): boolean => {
+  // Check that all required amenities have values
+  return (
+    amenities.rooms !== undefined &&
+    amenities.bathrooms !== undefined &&
+    amenities.garageSpaces !== undefined &&
+    amenities.hasPool !== undefined &&
+    amenities.hasBarbecue !== undefined &&
+    amenities.isPetFriendly !== undefined &&
+    amenities.hasAirConditioner !== undefined &&
+    amenities.hasHeater !== undefined &&
+    amenities.hasGym !== undefined
+  );
 };

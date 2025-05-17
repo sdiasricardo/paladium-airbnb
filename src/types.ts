@@ -6,6 +6,18 @@ export interface User {
   userType: UserType;
 }
 
+export interface MandatoryAmenities {
+  rooms: number;
+  bathrooms: number;
+  garageSpaces: number;
+  hasPool: boolean;
+  hasBarbecue: boolean;
+  isPetFriendly: boolean;
+  hasAirConditioner: boolean;
+  hasHeater: boolean;
+  hasGym: boolean;
+}
+
 export interface Property {
   id: number;
   hostId: number;
@@ -14,6 +26,7 @@ export interface Property {
   price: number;
   location: string;
   imageUrl: string;
+  amenities: MandatoryAmenities;
 }
 
 export interface Booking {

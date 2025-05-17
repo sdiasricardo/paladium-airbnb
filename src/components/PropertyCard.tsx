@@ -17,6 +17,10 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
       <div className="p-4">
         <h3 className="text-xl font-semibold mb-2">{property.title}</h3>
         <p className="text-gray-600 mb-2">{property.location}</p>
+        <div className="flex items-center text-gray-500 mb-2">
+          <span className="mr-3">{property.amenities.rooms} {property.amenities.rooms === 1 ? 'Room' : 'Rooms'}</span>
+          <span>{property.amenities.bathrooms} {property.amenities.bathrooms === 1 ? 'Bathroom' : 'Bathrooms'}</span>
+        </div>
         <p className="text-gray-800 font-bold">${property.price} / night</p>
         <Link 
           to={`/property/${property.id}`}

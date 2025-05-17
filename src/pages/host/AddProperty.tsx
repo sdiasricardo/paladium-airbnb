@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { createProperty } from '../../db/propertyService';
+import { MandatoryAmenities } from '../../types';
 
 const AddProperty: React.FC = () => {
   const [title, setTitle] = useState('');
@@ -9,9 +10,27 @@ const AddProperty: React.FC = () => {
   const [price, setPrice] = useState('');
   const [location, setLocation] = useState('');
   const [imageUrl, setImageUrl] = useState('');
+  const [amenities, setAmenities] = useState<MandatoryAmenities>({
+    rooms: 1,
+    bathrooms: 1,
+    garageSpaces: 0,
+    hasPool: false,
+    hasBarbecue: false,
+    isPetFriendly: false,
+    hasAirConditioner: false,
+    hasHeater: false,
+    hasGym: false
+  });
   const [error, setError] = useState('');
   const { currentUser } = useAuth();
   const navigate = useNavigate();
+
+  const handleAmenitiesChange = (field: keyof MandatoryAmenities, value: number | boolean) => {
+    setAmenities(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,7 +58,8 @@ const AddProperty: React.FC = () => {
       description,
       priceValue,
       location,
-      imageUrl
+      imageUrl,
+      amenities
     );
 
     if (property) {
@@ -142,6 +162,124 @@ const AddProperty: React.FC = () => {
             className="w-full px-3 py-2 border rounded-lg"
             placeholder="URL to property image"
           />
+        </div>
+        
+        <h3 className="text-lg font-semibold mb-4">Property Details</h3>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div>
+            <label className="block text-gray-700 mb-2" htmlFor="rooms">
+              Number of Rooms *
+            </label>
+            <input
+              id="rooms"
+              type="number"
+              value={amenities.rooms}
+              onChange={(e) => handleAmenitiesChange('rooms', parseInt(e.target.value) || 1)}
+              className="w-full px-3 py-2 border rounded-lg"
+              min="1"
+              required
+            />
+          </div>
+          
+          <div>
+            <label className="block text-gray-700 mb-2" htmlFor="bathrooms">
+              Number of Bathrooms *
+            </label>
+            <input
+              id="bathrooms"
+              type="number"
+              value={amenities.bathrooms}
+              onChange={(e) => handleAmenitiesChange('bathrooms', parseInt(e.target.value) || 1)}
+              className="w-full px-3 py-2 border rounded-lg"
+              min="1"
+              required
+            />
+          </div>
+          
+          <div>
+            <label className="block text-gray-700 mb-2" htmlFor="garageSpaces">
+              Garage Spaces
+            </label>
+            <input
+              id="garageSpaces"
+              type="number"
+              value={amenities.garageSpaces}
+              onChange={(e) => handleAmenitiesChange('garageSpaces', parseInt(e.target.value) || 0)}
+              className="w-full px-3 py-2 border rounded-lg"
+              min="0"
+            />
+          </div>
+        </div>
+        
+        <h3 className="text-lg font-semibold mb-4">Amenities</h3>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div className="flex items-center">
+            <input
+              id="hasPool"
+              type="checkbox"
+              checked={amenities.hasPool}
+              onChange={(e) => handleAmenitiesChange('hasPool', e.target.checked)}
+              className="mr-2"
+            />
+            <label htmlFor="hasPool">Swimming Pool</label>
+          </div>
+          
+          <div className="flex items-center">
+            <input
+              id="hasBarbecue"
+              type="checkbox"
+              checked={amenities.hasBarbecue}
+              onChange={(e) => handleAmenitiesChange('hasBarbecue', e.target.checked)}
+              className="mr-2"
+            />
+            <label htmlFor="hasBarbecue">Barbecue Area</label>
+          </div>
+          
+          <div className="flex items-center">
+            <input
+              id="isPetFriendly"
+              type="checkbox"
+              checked={amenities.isPetFriendly}
+              onChange={(e) => handleAmenitiesChange('isPetFriendly', e.target.checked)}
+              className="mr-2"
+            />
+            <label htmlFor="isPetFriendly">Pet Friendly</label>
+          </div>
+          
+          <div className="flex items-center">
+            <input
+              id="hasAirConditioner"
+              type="checkbox"
+              checked={amenities.hasAirConditioner}
+              onChange={(e) => handleAmenitiesChange('hasAirConditioner', e.target.checked)}
+              className="mr-2"
+            />
+            <label htmlFor="hasAirConditioner">Air Conditioner</label>
+          </div>
+          
+          <div className="flex items-center">
+            <input
+              id="hasHeater"
+              type="checkbox"
+              checked={amenities.hasHeater}
+              onChange={(e) => handleAmenitiesChange('hasHeater', e.target.checked)}
+              className="mr-2"
+            />
+            <label htmlFor="hasHeater">Heater</label>
+          </div>
+          
+          <div className="flex items-center">
+            <input
+              id="hasGym"
+              type="checkbox"
+              checked={amenities.hasGym}
+              onChange={(e) => handleAmenitiesChange('hasGym', e.target.checked)}
+              className="mr-2"
+            />
+            <label htmlFor="hasGym">Gym</label>
+          </div>
         </div>
         
         <button
