@@ -7,6 +7,8 @@ export const createProperty = async (
   description: string,
   price: number,
   location: string,
+  visibleLocation: string,
+  hideFullAddress: boolean,
   imageUrl: string,
   mandatoryAmenities: MandatoryAmenities,
   additionalAmenities: string[] = []
@@ -24,6 +26,8 @@ export const createProperty = async (
       description,
       price,
       location,
+      visibleLocation,
+      hideFullAddress,
       imageUrl,
       mandatoryAmenities,
       additionalAmenities
@@ -36,6 +40,8 @@ export const createProperty = async (
       description,
       price,
       location,
+      visibleLocation,
+      hideFullAddress,
       imageUrl,
       mandatoryAmenities,
       additionalAmenities

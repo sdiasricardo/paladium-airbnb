@@ -25,6 +25,8 @@ export interface Property {
   description: string;
   price: number;
   location: string;
+  visibleLocation: string;
+  hideFullAddress: boolean;
   imageUrl: string;
   mandatoryAmenities: MandatoryAmenities;
   additionalAmenities: string[];

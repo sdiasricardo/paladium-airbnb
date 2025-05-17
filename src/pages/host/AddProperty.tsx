@@ -9,8 +9,10 @@ const AddProperty: React.FC = () => {
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
   const [location, setLocation] = useState('');
+  const [hideFullAddress, setHideFullAddress] = useState(false);
+  const [visibleLocation, setVisibleLocation] = useState('');
   const [imageUrl, setImageUrl] = useState('');
-  const [amenities, setAmenities] = useState<MandatoryAmenities>({
+  const [mandatoryAmenities, setMandatoryAmenities] = useState<MandatoryAmenities>({
     rooms: 1,
     bathrooms: 1,
     garageSpaces: 0,
@@ -28,7 +30,7 @@ const AddProperty: React.FC = () => {
   const navigate = useNavigate();
 
   const handleAmenitiesChange = (field: keyof MandatoryAmenities, value: number | boolean) => {
-    setAmenities(prev => ({
+    setMandatoryAmenities(prev => ({
       ...prev,
       [field]: value
     }));
@@ -59,6 +61,11 @@ const AddProperty: React.FC = () => {
       return;
     }
 
+    if (hideFullAddress && !visibleLocation) {
+      setError('Please provide a visible location');
+      return;
+    }
+
     const priceValue = parseFloat(price);
     if (isNaN(priceValue) || priceValue <= 0) {
       setError('Please enter a valid price');
@@ -71,8 +78,10 @@ const AddProperty: React.FC = () => {
       description,
       priceValue,
       location,
+      hideFullAddress ? visibleLocation : location,
+      hideFullAddress,
       imageUrl,
-      amenities,
+      mandatoryAmenities,
       additionalAmenities
     );
 
@@ -151,7 +160,7 @@ const AddProperty: React.FC = () => {
         
         <div className="mb-4">
           <label className="block text-gray-700 mb-2" htmlFor="location">
-            Location *
+            Full Address *
           </label>
           <input
             id="location"
@@ -159,9 +168,44 @@ const AddProperty: React.FC = () => {
             value={location}
             onChange={(e) => setLocation(e.target.value)}
             className="w-full px-3 py-2 border rounded-lg"
-            placeholder="Property location"
+            placeholder="Full property address"
             required
           />
+        </div>
+        
+        <div className="mb-4">
+          <div className="flex items-center mb-2">
+            <input
+              id="hideFullAddress"
+              type="checkbox"
+              checked={hideFullAddress}
+              onChange={(e) => setHideFullAddress(e.target.checked)}
+              className="mr-2"
+            />
+            <label htmlFor="hideFullAddress" className="text-gray-700">
+              Hide full address from guests
+            </label>
+          </div>
+          
+          {hideFullAddress && (
+            <div>
+              <label className="block text-gray-700 mb-2" htmlFor="visibleLocation">
+                Visible Location (shown to guests) *
+              </label>
+              <input
+                id="visibleLocation"
+                type="text"
+                value={visibleLocation}
+                onChange={(e) => setVisibleLocation(e.target.value)}
+                className="w-full px-3 py-2 border rounded-lg"
+                placeholder="e.g. Downtown, Near Central Park, etc."
+                required={hideFullAddress}
+              />
+              <p className="text-sm text-gray-500 mt-1">
+                Enter a general area or neighborhood that will be shown to guests instead of the full address.
+              </p>
+            </div>
+          )}
         </div>
         
         <div className="mb-6">
@@ -188,7 +232,7 @@ const AddProperty: React.FC = () => {
             <input
               id="rooms"
               type="number"
-              value={amenities.rooms}
+              value={mandatoryAmenities.rooms}
               onChange={(e) => handleAmenitiesChange('rooms', parseInt(e.target.value) || 1)}
               className="w-full px-3 py-2 border rounded-lg"
               min="1"
@@ -203,7 +247,7 @@ const AddProperty: React.FC = () => {
             <input
               id="bathrooms"
               type="number"
-              value={amenities.bathrooms}
+              value={mandatoryAmenities.bathrooms}
               onChange={(e) => handleAmenitiesChange('bathrooms', parseInt(e.target.value) || 1)}
               className="w-full px-3 py-2 border rounded-lg"
               min="1"
@@ -218,7 +262,7 @@ const AddProperty: React.FC = () => {
             <input
               id="garageSpaces"
               type="number"
-              value={amenities.garageSpaces}
+              value={mandatoryAmenities.garageSpaces}
               onChange={(e) => handleAmenitiesChange('garageSpaces', parseInt(e.target.value) || 0)}
               className="w-full px-3 py-2 border rounded-lg"
               min="0"
@@ -233,7 +277,7 @@ const AddProperty: React.FC = () => {
             <input
               id="hasPool"
               type="checkbox"
-              checked={amenities.hasPool}
+              checked={mandatoryAmenities.hasPool}
               onChange={(e) => handleAmenitiesChange('hasPool', e.target.checked)}
               className="mr-2"
             />
@@ -244,7 +288,7 @@ const AddProperty: React.FC = () => {
             <input
               id="hasBarbecue"
               type="checkbox"
-              checked={amenities.hasBarbecue}
+              checked={mandatoryAmenities.hasBarbecue}
               onChange={(e) => handleAmenitiesChange('hasBarbecue', e.target.checked)}
               className="mr-2"
             />
@@ -255,7 +299,7 @@ const AddProperty: React.FC = () => {
             <input
               id="isPetFriendly"
               type="checkbox"
-              checked={amenities.isPetFriendly}
+              checked={mandatoryAmenities.isPetFriendly}
               onChange={(e) => handleAmenitiesChange('isPetFriendly', e.target.checked)}
               className="mr-2"
             />
@@ -266,7 +310,7 @@ const AddProperty: React.FC = () => {
             <input
               id="hasAirConditioner"
               type="checkbox"
-              checked={amenities.hasAirConditioner}
+              checked={mandatoryAmenities.hasAirConditioner}
               onChange={(e) => handleAmenitiesChange('hasAirConditioner', e.target.checked)}
               className="mr-2"
             />
@@ -277,7 +321,7 @@ const AddProperty: React.FC = () => {
             <input
               id="hasHeater"
               type="checkbox"
-              checked={amenities.hasHeater}
+              checked={mandatoryAmenities.hasHeater}
               onChange={(e) => handleAmenitiesChange('hasHeater', e.target.checked)}
               className="mr-2"
             />
@@ -288,7 +332,7 @@ const AddProperty: React.FC = () => {
             <input
               id="hasGym"
               type="checkbox"
-              checked={amenities.hasGym}
+              checked={mandatoryAmenities.hasGym}
               onChange={(e) => handleAmenitiesChange('hasGym', e.target.checked)}
               className="mr-2"
             />

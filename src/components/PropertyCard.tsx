@@ -7,6 +7,9 @@ interface PropertyCardProps {
 }
 
 const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
+  // Determine which location to display
+  const displayLocation = property.hideFullAddress ? property.visibleLocation : property.location;
+  
   return (
     <div className="border rounded-lg overflow-hidden shadow-md">
       <img 
@@ -16,7 +19,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
       />
       <div className="p-4">
         <h3 className="text-xl font-semibold mb-2">{property.title}</h3>
-        <p className="text-gray-600 mb-2">{property.location}</p>
+        <p className="text-gray-600 mb-2">{displayLocation}</p>
         <div className="flex items-center text-gray-500 mb-2">
           <span className="mr-3">{property.mandatoryAmenities.rooms} {property.mandatoryAmenities.rooms === 1 ? 'Room' : 'Rooms'}</span>
           <span>{property.mandatoryAmenities.bathrooms} {property.mandatoryAmenities.bathrooms === 1 ? 'Bathroom' : 'Bathrooms'}</span>

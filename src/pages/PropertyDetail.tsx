@@ -89,6 +89,10 @@ const PropertyDetail: React.FC = () => {
     return <div className="text-center py-10">Property not found</div>;
   }
 
+  // Determine which location to display
+  const displayLocation = property.hideFullAddress ? property.visibleLocation : property.location;
+  const isPropertyOwner = currentUser && currentUser.userType === 'host' && property.hostId === currentUser.id;
+
   return (
     <div className="container mx-auto py-8 px-4">
       <div className="bg-white rounded-lg shadow-md overflow-hidden">
@@ -100,7 +104,19 @@ const PropertyDetail: React.FC = () => {
         
         <div className="p-6">
           <h1 className="text-3xl font-bold mb-2">{property.title}</h1>
-          <p className="text-gray-600 mb-4">{property.location}</p>
+          <div className="mb-4">
+            <p className="text-gray-600">{displayLocation}</p>
+            {isPropertyOwner && property.hideFullAddress && (
+              <div className="mt-1 p-2 bg-gray-50 border border-gray-200 rounded">
+                <p className="text-sm text-gray-500">
+                  <span className="font-medium">Full address (only visible to you):</span> {property.location}
+                </p>
+                <p className="text-sm text-gray-500">
+                  <span className="font-medium">Address shown to guests:</span> {property.visibleLocation}
+                </p>
+              </div>
+            )}
+          </div>
           <p className="text-xl font-bold text-red-500 mb-4">${property.price} / night</p>
           
           <div className="border-t border-gray-200 pt-4 mb-6">
