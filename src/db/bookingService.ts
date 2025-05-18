@@ -7,7 +7,8 @@ export const createBooking = async (
   propertyId: number,
   guestId: number,
   startDate: string,
-  endDate: string
+  endDate: string,
+  guestCount: number
 ): Promise<Booking | null> => {
   try {
     // Check if the property is available for the selected dates
@@ -21,7 +22,8 @@ export const createBooking = async (
       propertyId,
       guestId,
       startDate,
-      endDate
+      endDate,
+      guestCount
     });
     
     return {
@@ -29,7 +31,8 @@ export const createBooking = async (
       propertyId,
       guestId,
       startDate,
-      endDate
+      endDate,
+      guestCount
     };
   } catch (error) {
     console.error('Error creating booking:', error);

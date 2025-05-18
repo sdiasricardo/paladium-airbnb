@@ -22,7 +22,8 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
         <p className="text-gray-600 mb-2">{displayLocation}</p>
         <div className="flex items-center text-gray-500 mb-2">
           <span className="mr-3">{property.mandatoryAmenities.rooms} {property.mandatoryAmenities.rooms === 1 ? 'Room' : 'Rooms'}</span>
-          <span>{property.mandatoryAmenities.bathrooms} {property.mandatoryAmenities.bathrooms === 1 ? 'Bathroom' : 'Bathrooms'}</span>
+          <span className="mr-3">{property.mandatoryAmenities.bathrooms} {property.mandatoryAmenities.bathrooms === 1 ? 'Bathroom' : 'Bathrooms'}</span>
+          <span>{property.maxGuests} {property.maxGuests === 1 ? 'Guest' : 'Guests'}</span>
         </div>
         <p className="text-gray-800 font-bold">${property.price} / night</p>
         <Link 

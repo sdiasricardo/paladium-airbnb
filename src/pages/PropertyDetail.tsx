@@ -12,6 +12,7 @@ const PropertyDetail: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [guestCount, setGuestCount] = useState(1);
   const [bookingError, setBookingError] = useState('');
   const [bookingSuccess, setBookingSuccess] = useState(false);
   const { currentUser } = useAuth();
@@ -60,17 +61,23 @@ const PropertyDetail: React.FC = () => {
 
     if (!property) return;
 
+    if (guestCount > property.maxGuests) {
+      setBookingError(`This property can only accommodate up to ${property.maxGuests} guests`);
+      return;
+    }
+
     const available = await isPropertyAvailable(property.id, startDate, endDate);
     if (!available) {
       setBookingError('Property is not available for the selected dates');
       return;
     }
 
-    const booking = await createBooking(property.id, currentUser.id, startDate, endDate);
+    const booking = await createBooking(property.id, currentUser.id, startDate, endDate, guestCount);
     if (booking) {
       setBookingSuccess(true);
       setStartDate('');
       setEndDate('');
+      setGuestCount(1);
     } else {
       setBookingError('Failed to create booking');
     }
@@ -132,6 +139,9 @@ const PropertyDetail: React.FC = () => {
               </div>
               <div className="flex items-center">
                 <span className="font-medium">{property.mandatoryAmenities.bathrooms} {property.mandatoryAmenities.bathrooms === 1 ? 'Bathroom' : 'Bathrooms'}</span>
+              </div>
+              <div className="flex items-center">
+                <span className="font-medium">{property.maxGuests} {property.maxGuests === 1 ? 'Guest' : 'Guests'} maximum</span>
               </div>
               {property.mandatoryAmenities.garageSpaces > 0 && (
                 <div className="flex items-center">
@@ -204,6 +214,25 @@ const PropertyDetail: React.FC = () => {
                 propertyId={property.id} 
                 onDateRangeSelect={handleDateRangeSelect} 
               />
+              
+              <div className="mb-4 mt-4">
+                <label className="block text-gray-700 mb-2" htmlFor="guestCount">
+                  Number of Guests *
+                </label>
+                <input
+                  id="guestCount"
+                  type="number"
+                  value={guestCount}
+                  onChange={(e) => setGuestCount(parseInt(e.target.value) || 1)}
+                  className="w-full px-3 py-2 border rounded-lg"
+                  min="1"
+                  max={property.maxGuests}
+                  required
+                />
+                <p className="text-sm text-gray-500 mt-1">
+                  Maximum {property.maxGuests} {property.maxGuests === 1 ? 'guest' : 'guests'}
+                </p>
+              </div>
               
               <button
                 onClick={handleBooking}

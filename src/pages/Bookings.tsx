@@ -123,6 +123,9 @@ const Bookings: React.FC = () => {
                       <span className="font-semibold">Check-out:</span> {new Date(booking.endDate).toLocaleDateString()}
                     </div>
                     <div>
+                      <span className="font-semibold">Guests:</span> {booking.guestCount || 1}
+                    </div>
+                    <div>
                       <span className="font-semibold">Price:</span> ${booking.property?.price || 0}/night
                     </div>
                   </div>

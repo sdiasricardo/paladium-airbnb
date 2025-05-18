@@ -12,6 +12,7 @@ const AddProperty: React.FC = () => {
   const [hideFullAddress, setHideFullAddress] = useState(false);
   const [visibleLocation, setVisibleLocation] = useState('');
   const [imageUrl, setImageUrl] = useState('');
+  const [maxGuests, setMaxGuests] = useState(1);
   const [mandatoryAmenities, setMandatoryAmenities] = useState<MandatoryAmenities>({
     rooms: 1,
     bathrooms: 1,
@@ -81,6 +82,7 @@ const AddProperty: React.FC = () => {
       hideFullAddress ? visibleLocation : location,
       hideFullAddress,
       imageUrl,
+      maxGuests,
       mandatoryAmenities,
       additionalAmenities
     );
@@ -154,6 +156,22 @@ const AddProperty: React.FC = () => {
             placeholder="Price per night"
             min="1"
             step="0.01"
+            required
+          />
+        </div>
+        
+        <div className="mb-4">
+          <label className="block text-gray-700 mb-2" htmlFor="maxGuests">
+            Maximum Guests *
+          </label>
+          <input
+            id="maxGuests"
+            type="number"
+            value={maxGuests}
+            onChange={(e) => setMaxGuests(parseInt(e.target.value) || 1)}
+            className="w-full px-3 py-2 border rounded-lg"
+            placeholder="Maximum number of guests"
+            min="1"
             required
           />
         </div>

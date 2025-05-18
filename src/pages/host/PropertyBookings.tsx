@@ -93,6 +93,7 @@ const PropertyBookings: React.FC = () => {
                 <th className="py-3 px-4 text-left">Guest</th>
                 <th className="py-3 px-4 text-left">Check-in Date</th>
                 <th className="py-3 px-4 text-left">Check-out Date</th>
+                <th className="py-3 px-4 text-left">Guests</th>
                 <th className="py-3 px-4 text-left">Duration</th>
                 <th className="py-3 px-4 text-left">Total</th>
               </tr>
@@ -109,6 +110,7 @@ const PropertyBookings: React.FC = () => {
                     <td className="py-3 px-4">{booking.guestName}</td>
                     <td className="py-3 px-4">{new Date(booking.startDate).toLocaleDateString()}</td>
                     <td className="py-3 px-4">{new Date(booking.endDate).toLocaleDateString()}</td>
+                    <td className="py-3 px-4">{booking.guestCount || 1}</td>
                     <td className="py-3 px-4">{nights} night{nights !== 1 ? 's' : ''}</td>
                     <td className="py-3 px-4">${total.toFixed(2)}</td>
                   </tr>

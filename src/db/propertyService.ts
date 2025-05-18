@@ -10,6 +10,7 @@ export const createProperty = async (
   visibleLocation: string,
   hideFullAddress: boolean,
   imageUrl: string,
+  maxGuests: number,
   mandatoryAmenities: MandatoryAmenities,
   additionalAmenities: string[] = []
 ): Promise<Property | null> => {
@@ -29,6 +30,7 @@ export const createProperty = async (
       visibleLocation,
       hideFullAddress,
       imageUrl,
+      maxGuests,
       mandatoryAmenities,
       additionalAmenities
     });
@@ -43,6 +45,7 @@ export const createProperty = async (
       visibleLocation,
       hideFullAddress,
       imageUrl,
+      maxGuests,
       mandatoryAmenities,
       additionalAmenities
     };

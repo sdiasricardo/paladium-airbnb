@@ -3,7 +3,7 @@ import { openDB, deleteDB } from 'idb';
 
 const initDB = async () => {
   // Increment the version number to trigger the upgrade function
-  const db = await openDB('airbnb-clone', 2, {
+  const db = await openDB('airbnb-clone', 3, {
     upgrade(db, oldVersion, newVersion, transaction) {
       // Create users store
       if (!db.objectStoreNames.contains('users')) {

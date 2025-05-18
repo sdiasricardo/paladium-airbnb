@@ -28,6 +28,7 @@ export interface Property {
   visibleLocation: string;
   hideFullAddress: boolean;
   imageUrl: string;
+  maxGuests: number;
   mandatoryAmenities: MandatoryAmenities;
   additionalAmenities: string[];
 }
@@ -38,4 +39,5 @@ export interface Booking {
   guestId: number;
   startDate: string;
   endDate: string;
+  guestCount: number;
 }
