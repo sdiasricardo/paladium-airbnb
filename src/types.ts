@@ -6,6 +6,13 @@ export interface User {
   userType: UserType;
 }
 
+export interface PropertySearchFilters {
+  minPrice?: number;
+  maxPrice?: number;
+  guests?: number;
+  amenities?: Partial<MandatoryAmenities>;
+}
+
 export interface MandatoryAmenities {
   rooms: number;
   bathrooms: number;

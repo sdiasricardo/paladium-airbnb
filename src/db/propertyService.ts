@@ -1,5 +1,46 @@
 import { dbPromise } from './database';
-import { Property, MandatoryAmenities } from '../types';
+import { Property, MandatoryAmenities, PropertySearchFilters } from '../types';
+
+export const searchProperties = async (
+  searchTerm: string = '',
+  filters?: PropertySearchFilters
+): Promise<Property[]> => {
+  try {
+    const allProperties = await getAllProperties();
+    
+    return allProperties.filter(property => {
+      // Search by term (description and location)
+      const matchesSearchTerm = searchTerm === '' || 
+        property.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        property.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        property.title.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      if (!matchesSearchTerm || !filters) return matchesSearchTerm;
+      
+      // Apply filters if they exist
+      const amenitiesMatch = !filters.amenities || Object.entries(filters.amenities).every(([key, value]) => {
+        if (value === undefined || value === null) return true;
+        
+        // For numeric values like rooms and bathrooms, we want properties with at least that many
+        if (key === 'rooms' || key === 'bathrooms') {
+          return property.mandatoryAmenities[key] >= (value as number);
+        }
+        
+        return property.mandatoryAmenities[key as keyof MandatoryAmenities] === value;
+      });
+      
+      const priceMatch = (!filters.minPrice || property.price >= filters.minPrice) && 
+                         (!filters.maxPrice || property.price <= filters.maxPrice);
+      
+      const guestsMatch = !filters.guests || property.maxGuests >= filters.guests;
+      
+      return amenitiesMatch && priceMatch && guestsMatch;
+    });
+  } catch (error) {
+    console.error('Error searching properties:', error);
+    return [];
+  }
+};
 
 export const createProperty = async (
   hostId: number,
