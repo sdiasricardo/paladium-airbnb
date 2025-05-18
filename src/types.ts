@@ -25,6 +25,13 @@ export interface MandatoryAmenities {
   hasGym: boolean;
 }
 
+export interface PropertyImage {
+  id?: number;
+  propertyId?: number;
+  imageData: string; // Base64 encoded PNG data
+  isPrimary: boolean;
+}
+
 export interface Property {
   id: number;
   hostId: number;
@@ -34,7 +41,7 @@ export interface Property {
   location: string;
   visibleLocation: string;
   hideFullAddress: boolean;
-  imageUrl: string;
+  images: PropertyImage[];
   maxGuests: number;
   mandatoryAmenities: MandatoryAmenities;
   additionalAmenities: string[];

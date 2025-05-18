@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Property } from '../types';
+import { Property, PropertyImage } from '../types';
 import { getPropertyById } from '../db/propertyService';
 import { createBooking, isPropertyAvailable } from '../db/bookingService';
 import { useAuth } from '../context/AuthContext';
@@ -10,6 +10,7 @@ const PropertyDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [property, setProperty] = useState<Property | null>(null);
   const [loading, setLoading] = useState(true);
+  const [selectedImage, setSelectedImage] = useState<PropertyImage | null>(null);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [guestCount, setGuestCount] = useState(1);
@@ -24,6 +25,12 @@ const PropertyDetail: React.FC = () => {
         try {
           const fetchedProperty = await getPropertyById(parseInt(id));
           setProperty(fetchedProperty);
+          
+          // Set the primary image or first image as selected
+          if (fetchedProperty?.images && fetchedProperty.images.length > 0) {
+            const primaryImage = fetchedProperty.images.find(img => img.isPrimary);
+            setSelectedImage(primaryImage || fetchedProperty.images[0]);
+          }
         } catch (error) {
           console.error('Error fetching property:', error);
         } finally {
@@ -103,11 +110,36 @@ const PropertyDetail: React.FC = () => {
   return (
     <div className="container mx-auto py-8 px-4">
       <div className="bg-white rounded-lg shadow-md overflow-hidden">
-        <img 
-          src={property.imageUrl || 'https://via.placeholder.com/800x400?text=No+Image'} 
-          alt={property.title}
-          className="w-full h-96 object-cover"
-        />
+        {property.images && property.images.length > 0 ? (
+          <div className="relative">
+            <div className="w-full h-96 overflow-hidden">
+              <img 
+                src={selectedImage?.imageData || property.images.find(img => img.isPrimary)?.imageData || property.images[0].imageData} 
+                alt={property.title}
+                className="w-full h-96 object-cover"
+              />
+            </div>
+            {property.images.length > 1 && (
+              <div className="flex overflow-x-auto gap-2 p-2 bg-gray-100">
+                {property.images.map((image, index) => (
+                  <img 
+                    key={index}
+                    src={image.imageData} 
+                    alt={`${property.title} - image ${index + 1}`}
+                    className={`h-20 w-32 object-cover cursor-pointer rounded ${selectedImage?.id === image.id ? 'ring-2 ring-red-500' : ''}`}
+                    onClick={() => setSelectedImage(image)}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        ) : (
+          <img 
+            src="https://via.placeholder.com/800x400?text=No+Image" 
+            alt={property.title}
+            className="w-full h-96 object-cover"
+          />
+        )}
         
         <div className="p-6">
           <h1 className="text-3xl font-bold mb-2">{property.title}</h1>

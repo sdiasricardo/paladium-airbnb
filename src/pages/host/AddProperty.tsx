@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { createProperty } from '../../db/propertyService';
-import { MandatoryAmenities } from '../../types';
+import { MandatoryAmenities, PropertyImage } from '../../types';
 
 const AddProperty: React.FC = () => {
   const [title, setTitle] = useState('');
@@ -11,7 +11,7 @@ const AddProperty: React.FC = () => {
   const [location, setLocation] = useState('');
   const [hideFullAddress, setHideFullAddress] = useState(false);
   const [visibleLocation, setVisibleLocation] = useState('');
-  const [imageUrl, setImageUrl] = useState('');
+  const [uploadedImages, setUploadedImages] = useState<PropertyImage[]>([]);
   const [maxGuests, setMaxGuests] = useState(1);
   const [mandatoryAmenities, setMandatoryAmenities] = useState<MandatoryAmenities>({
     rooms: 1,
@@ -48,6 +48,54 @@ const AddProperty: React.FC = () => {
     setAdditionalAmenities(additionalAmenities.filter((_, i) => i !== index));
   };
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    
+    const newImages: PropertyImage[] = [];
+    const fileArray = Array.from(files);
+    
+    fileArray.forEach((file, index) => {
+      const reader = new FileReader();
+      
+      reader.onload = (e) => {
+        if (e.target?.result) {
+          newImages.push({
+            imageData: e.target.result as string,
+            isPrimary: index === 0 && uploadedImages.length === 0 // First image is primary if no images exist
+          });
+          
+          if (newImages.length === fileArray.length) {
+            setUploadedImages([...uploadedImages, ...newImages]);
+          }
+        }
+      };
+      
+      reader.readAsDataURL(file);
+    });
+  };
+  
+  const removeImage = (index: number) => {
+    const newImages = [...uploadedImages];
+    const removedImage = newImages.splice(index, 1)[0];
+    
+    // If we removed the primary image, set the first remaining image as primary
+    if (removedImage.isPrimary && newImages.length > 0) {
+      newImages[0].isPrimary = true;
+    }
+    
+    setUploadedImages(newImages);
+  };
+  
+  const setPrimaryImage = (index: number) => {
+    const newImages = uploadedImages.map((img, i) => ({
+      ...img,
+      isPrimary: i === index
+    }));
+    
+    setUploadedImages(newImages);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -81,7 +129,7 @@ const AddProperty: React.FC = () => {
       location,
       hideFullAddress ? visibleLocation : location,
       hideFullAddress,
-      imageUrl,
+      uploadedImages,
       maxGuests,
       mandatoryAmenities,
       additionalAmenities
@@ -227,17 +275,55 @@ const AddProperty: React.FC = () => {
         </div>
         
         <div className="mb-6">
-          <label className="block text-gray-700 mb-2" htmlFor="imageUrl">
-            Image URL
+          <label className="block text-gray-700 mb-2">
+            Property Images (PNG only)
           </label>
-          <input
-            id="imageUrl"
-            type="text"
-            value={imageUrl}
-            onChange={(e) => setImageUrl(e.target.value)}
-            className="w-full px-3 py-2 border rounded-lg"
-            placeholder="URL to property image"
-          />
+          <div className="border rounded-lg p-4">
+            <input
+              type="file"
+              accept=".png"
+              multiple
+              onChange={handleImageUpload}
+              className="mb-3"
+            />
+            <p className="text-sm text-gray-500 mb-3">
+              You can upload multiple PNG images. The first image will be used as the primary image.
+            </p>
+            
+            {uploadedImages.length > 0 && (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-3">
+                {uploadedImages.map((img, index) => (
+                  <div key={index} className="relative">
+                    <img 
+                      src={img.imageData} 
+                      alt={`Property image ${index + 1}`} 
+                      className={`w-full h-32 object-cover rounded ${img.isPrimary ? 'ring-2 ring-red-500' : ''}`}
+                    />
+                    <div className="absolute top-1 right-1 flex gap-1">
+                      {!img.isPrimary && (
+                        <button
+                          type="button"
+                          onClick={() => setPrimaryImage(index)}
+                          className="bg-blue-500 text-white p-1 rounded-full text-xs"
+                          title="Set as primary"
+                        >
+                          ★
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => removeImage(index)}
+                        className="bg-red-500 text-white p-1 rounded-full text-xs"
+                        title="Remove image"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
         
         <h3 className="text-lg font-semibold mb-4">Property Details</h3>

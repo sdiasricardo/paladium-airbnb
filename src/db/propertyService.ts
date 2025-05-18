@@ -50,7 +50,7 @@ export const createProperty = async (
   location: string,
   visibleLocation: string,
   hideFullAddress: boolean,
-  imageUrl: string,
+  images: { imageData: string, isPrimary: boolean }[] = [],
   maxGuests: number,
   mandatoryAmenities: MandatoryAmenities,
   additionalAmenities: string[] = []
@@ -70,11 +70,29 @@ export const createProperty = async (
       location,
       visibleLocation,
       hideFullAddress,
-      imageUrl,
+      images: [],
       maxGuests,
       mandatoryAmenities,
       additionalAmenities
     });
+    
+    // Add images to the propertyImages store
+    const propertyImages = [];
+    for (const image of images) {
+      const tx = db.transaction('propertyImages', 'readwrite');
+      const imageId = await tx.store.add({
+        propertyId: id,
+        imageData: image.imageData,
+        isPrimary: image.isPrimary
+      });
+      
+      propertyImages.push({
+        id: imageId as number,
+        propertyId: id as number,
+        imageData: image.imageData,
+        isPrimary: image.isPrimary
+      });
+    }
     
     return {
       id: id as number,
@@ -85,7 +103,7 @@ export const createProperty = async (
       location,
       visibleLocation,
       hideFullAddress,
-      imageUrl,
+      images: propertyImages,
       maxGuests,
       mandatoryAmenities,
       additionalAmenities
@@ -103,7 +121,28 @@ export const getPropertiesByHostId = async (hostId: number): Promise<Property[]>
     const index = tx.store.index('hostId');
     
     const properties = await index.getAll(hostId);
-    return properties as Property[];
+    
+    // Get all images for these properties
+    const propertyIds = properties.map(p => p.id);
+    const images = await Promise.all(
+      propertyIds.map(async (propId) => {
+        const imgTx = db.transaction('propertyImages', 'readonly');
+        const imgIndex = imgTx.store.index('propertyId');
+        return { propId, images: await imgIndex.getAll(propId) };
+      })
+    );
+    
+    // Create a map of property ID to images
+    const imageMap = images.reduce((map, item) => {
+      map[item.propId] = item.images;
+      return map;
+    }, {} as Record<number, any[]>);
+    
+    // Attach images to their properties
+    return properties.map(property => ({
+      ...property,
+      images: imageMap[property.id] || []
+    })) as Property[];
   } catch (error) {
     console.error('Error getting host properties:', error);
     return [];
@@ -114,7 +153,25 @@ export const getAllProperties = async (): Promise<Property[]> => {
   try {
     const db = await dbPromise;
     const properties = await db.getAll('properties');
-    return properties as Property[];
+    
+    // Get all images
+    const tx = db.transaction('propertyImages', 'readonly');
+    const allImages = await tx.store.getAll();
+    
+    // Group images by propertyId
+    const imagesByProperty = allImages.reduce((acc, img) => {
+      if (!acc[img.propertyId]) {
+        acc[img.propertyId] = [];
+      }
+      acc[img.propertyId].push(img);
+      return acc;
+    }, {} as Record<number, any[]>);
+    
+    // Attach images to their properties
+    return properties.map(property => ({
+      ...property,
+      images: imagesByProperty[property.id] || []
+    })) as Property[];
   } catch (error) {
     console.error('Error getting all properties:', error);
     return [];
@@ -125,7 +182,18 @@ export const getPropertyById = async (id: number): Promise<Property | null> => {
   try {
     const db = await dbPromise;
     const property = await db.get('properties', id);
-    return property || null;
+    
+    if (!property) return null;
+    
+    // Get images for this property
+    const tx = db.transaction('propertyImages', 'readonly');
+    const index = tx.store.index('propertyId');
+    const images = await index.getAll(id);
+    
+    return {
+      ...property,
+      images: images || []
+    };
   } catch (error) {
     console.error('Error getting property:', error);
     return null;
