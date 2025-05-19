@@ -107,7 +107,9 @@ const Bookings: React.FC = () => {
               <div className="md:flex">
                 <div className="md:w-1/3">
                   <img 
-                    src={booking.property?.imageUrl || 'https://via.placeholder.com/300x200?text=No+Image'} 
+                    src={booking.property?.images?.find(img => img.isPrimary)?.imageData || 
+                         booking.property?.images?.[0]?.imageData || 
+                         'https://via.placeholder.com/300x200?text=No+Image'} 
                     alt={booking.property?.title || 'Property'}
                     className="w-full h-48 object-cover"
                   />
